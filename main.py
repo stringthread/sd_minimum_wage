@@ -1,10 +1,10 @@
 from copy import deepcopy
 TIME_LENGTH=80
 WAGE_STEP=100
-rate_match=0.13#ミスマッチ指数: job=∞でt=30での失業率3%となるよう調整
+rate_match=0.34#ミスマッチ指数: job*=10でt=30での失業率2.2%となるよう調整
 min_wage=1013#最低賃金
 min_liv_wage=1220000/12/173.8*1013/902#最低生計費
-initial_unemp_n=[340,300]
+initial_unemp_n=[17094,100271]
 unemp_n=deepcopy(initial_unemp_n)#新規就労希望者 [低求人,高求人]
 unemp_e=[0,0]#経験者失業
 wage=[i for i in range(600,2001,WAGE_STEP)]#時給:階級上限値
@@ -30,17 +30,17 @@ job=[
     [0,0], #-700
     [0,0], #-800
     [0,0], #-900
-    [18,18], #-1000
-    [30,30], #-1100
-    [28,28], #-1200
-    [7,7], #-1300
-    [5,5], #-1400
-    [3,3], #-1500
-    [4,4], #-1600
-    [1,1], #-1700
-    [0,0], #-1800
-    [1,1], #-1900
-    [323,423] #1901-
+    [0,0], #-1000
+    [536,3294], #-1100
+    [893,5490], #-1200
+    [834,5124], #-1300
+    [208,1281], #-1400
+    [149,915], #-1500
+    [89,549], #-1600
+    [119,732], #-1700
+    [30,183], #-1800
+    [0,0], #-1900
+    [11137,68437] #1901-
 ]#求人: [時給階層][低求人/高求人]: フルタイム換算
 rate_part=[
     [1,1], #-600
@@ -48,16 +48,16 @@ rate_part=[
     [1,1], #-800
     [1,1], #-900
     [1,1], #-1000
-    [0.8,0.8], #-1100
-    [0.7,0.7], #-1200
-    [0.7,0.7], #-1300
-    [0.5,0.5], #-1400
-    [0.5,0.5], #-1500
+    [0.9,0.9], #-1100
+    [0.9,0.9], #-1200
+    [0.8,0.8], #-1300
+    [0.7,0.7], #-1400
+    [0.6,0.6], #-1500
     [0.5,0.5], #-1600
     [0.3,0.3], #-1700
     [0.2,0.2], #-1800
     [0.1,0.1], #-1900
-    [0.05,0.05] #1901-
+    [0.01,0.01] #1901-
 ]
 worktime=[1,0.53]#[フル/パート]
 history_unemp=[-1 for i in range(TIME_LENGTH)]
@@ -73,11 +73,11 @@ def update_unemp():
         for i in range(len(worker)):
             for full_part in range(len(worker[0][0])):
                 if i==len(worker)-1: #主に正規雇用
-                    rate_change=0.01
                     rate_retire=0.025 #40年で入れ替わり
+                    rate_change=0.170-rate_retire
                 else:
-                    rate_change=0.1
-                    rate_retire=0.025
+                    rate_retire=0.025 #40年で入れ替わり
+                    rate_change=0.396-rate_retire
                 unemp_e[type]+=worker[i][type][full_part]*rate_change#転職
                 worker[i][type][full_part]=worker[i][type][full_part]*(1-rate_change-rate_retire)#退職
     #非就業者のretire
@@ -86,6 +86,7 @@ def update_unemp():
     unemp_e[1]*=(1-rate_retire)
     unemp_n[0]*=(1-rate_retire)
     unemp_n[1]*=(1-rate_retire)
+    #新規参入
     unemp_n[0]+=initial_unemp_n[0]*rate_retire
     unemp_n[1]+=initial_unemp_n[1]*rate_retire
 
